@@ -36,8 +36,8 @@ function binaryString(intvalue) {
 }
 
 function getStartCode(version, length, mode) {
-  let modeCode = fillZero(binaryString(MODE_Numeric), 4),
-    charCode = fillZero(binaryString(len), versionBits(version, MODE_Numeric));
+  let modeCode = fillZero(binaryString(mode), 4),
+    charCode = fillZero(binaryString(length), versionBits(version, mode));
   return `${modeCode}${charCode}`;
 }
 
@@ -46,28 +46,18 @@ function NumericMode(str, version) {
   let endchar = '',
     len = str.length,
     startCode = getStartCode(version, len, MODE_Numeric);
-  let arr = str.split('')
-  if (len % 2 === 1) {
-    endchar = arr.pop();
-  }
+  let arr = str.match(/\d{2,3}/g);
 
-  let temp = 0;
-  let strcode = arr.reduce((ret, item, index) => {
-
-    value = charValue(item);
-
-    if (index % 2 === 0) {
-      temp = 0;
-      temp += (value * 45);
-      return ret;
-    } else {
-      temp += value;
-      return ret += fillZero(binaryString(temp), 11);
+  let strcode = arr.reduce((ret, item) => {
+    if (item.length % 3 === 0) {
+      return ret += fillZero(binaryString(item), versionBits(version, MODE_Numeric))
+    } else if (item.length % 3 === 1) {
+      return ret += fillZero(binaryString(item), 4)
+    } else if (item.length % 3 === 2) {
+      return ret += fillZero(binaryString(item), 8)
     }
-  }, );
 
-  if (endchar.length === 1)
-    strcode += fillZero(binaryString(endchar), 6);
+  }, startCode);
 
   return strcode;
 }
@@ -99,7 +89,10 @@ function AlphanumericMode(str, version) {
   }, startCode);
 
   if (endchar.length === 1)
-    strcode += fillZero(binaryString(endchar), 6);
+    strcode += fillZero(binaryString(charValue(endchar)), 6);
 
   return strcode;
 }
+
+console.log(AlphanumericMode('AE-86', 1))
+console.log(NumericMode('01234567', 1))

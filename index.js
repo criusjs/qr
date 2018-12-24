@@ -7,6 +7,21 @@ const MODE_FNC1_1 = 0b0101; //5
 const MODE_ECI = 0b0111; //7
 const MODE_Kanji = 0b1000; //8 - 
 const MODE_FNC1_2 = 0b1001; //9
+const MODE_China = 0b1101; //13
+
+const LEVEL_L = 0b01;
+const LEVEL_M = 0b00;
+const LEVEL_Q = 0b11;
+const LEVEL_H = 0b10;
+
+const MASK_0 = 0b000; // (i+j) % 2 = 0
+const MASK_1 = 0b001; // i % 2 = 0
+const MASK_2 = 0b010; // j % 3 = 0
+const MASK_3 = 0b011; // (i+j) % 3 = 0
+const MASK_4 = 0b100; // (i/2 + j/3) % 2 = 0
+const MASK_5 = 0b101; // ij % 2 + ij % 3 = 0
+const MASK_6 = 0b110; // (ij % 2 + ij % 3) % 2 = 0
+const MASK_7 = 0b111; // (ij % 3 + (i+j) % 2) % 2 = 0
 
 function versionBits(version, mode) {
   if (version >= 1 && version <= 9) {
@@ -18,15 +33,16 @@ function versionBits(version, mode) {
   }
 }
 
+
 function charValue(char) {
   // 0-44,共45种，采用45进制
   return '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:'.indexOf(char);
 }
 
-function fillZero(str, length) {
+function fillZero(str, length, fillAfter) {
   let len = length - str.length;
   for (let index = 0; index < len; index++) {
-    str = `0${str}`;
+    str = fillAfter ? `${str}0` : `0${str}`;
   }
   return str;
 }
@@ -43,7 +59,7 @@ function getStartCode(version, length, mode) {
 
 function getEndCode(code) {
   code += '0000';
-  return fillZero(code, 8 - code % 8);
+  return fillZero(code, Math.ceil(code.length / 8.0) * 8, true);
 }
 
 function NumericMode(str, version) {
@@ -54,12 +70,12 @@ function NumericMode(str, version) {
   let arr = str.match(/\d{2,3}/g);
 
   let strcode = arr.reduce((ret, item) => {
-    if (item.length % 3 === 0) {
+    if (item.length === 3) {
       return ret += fillZero(binaryString(item), versionBits(version, MODE_Numeric))
-    } else if (item.length % 3 === 1) {
-      return ret += fillZero(binaryString(item), 4)
-    } else if (item.length % 3 === 2) {
+    } else if (item.length === 2) {
       return ret += fillZero(binaryString(item), 8)
+    } else if (item.length === 1) {
+      return ret += fillZero(binaryString(item), 4)
     }
 
   }, startCode);
@@ -100,5 +116,5 @@ function AlphanumericMode(str, version) {
 }
 
 console.log(AlphanumericMode('AE-86', 1))
-console.log(AlphanumericMode('CHANDLERGENG', 1))
+console.log(AlphanumericMode('HELLO WORLD', 1))
 console.log(NumericMode('01234567', 1))

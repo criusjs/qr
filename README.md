@@ -1,5 +1,7 @@
 # [qr](https://blog.csdn.net/ajianyingxiaoqinghan/article/details/78837864)
+[](http://www.cnblogs.com/xxaxx/p/3416450.html)
 [--](https://github.com/alexeyten/qr-image)
+[](https://www.cnblogs.com/sky-heaven/p/6841901.html)
 #### 基础编码
 
 - 数据码 = 编码 + 字符号 + 内容编码 + 结束符 + 补齐符

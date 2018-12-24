@@ -1,5 +1,5 @@
 # [qr](https://blog.csdn.net/ajianyingxiaoqinghan/article/details/78837864)
-
+[--](https://github.com/alexeyten/qr-image)
 #### 基础编码
 
 - 数据码 = 编码 + 字符号 + 内容编码 + 结束符 + 补齐符

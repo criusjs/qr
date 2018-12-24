@@ -41,6 +41,11 @@ function getStartCode(version, length, mode) {
   return `${modeCode}${charCode}`;
 }
 
+function getEndCode(code) {
+  code += '0000';
+  return fillZero(code, 8 - code % 8);
+}
+
 function NumericMode(str, version) {
   // 将每两个字符分为一组，然后转成上 45 进制，再转为 11bits 的二进制结果。对于落单的一个字符，则转为 6bits 的二进制结果
   let endchar = '',
@@ -59,7 +64,7 @@ function NumericMode(str, version) {
 
   }, startCode);
 
-  return strcode;
+  return getEndCode(strcode);
 }
 
 function AlphanumericMode(str, version) {
@@ -91,8 +96,9 @@ function AlphanumericMode(str, version) {
   if (endchar.length === 1)
     strcode += fillZero(binaryString(charValue(endchar)), 6);
 
-  return strcode;
+  return getEndCode(strcode);
 }
 
 console.log(AlphanumericMode('AE-86', 1))
+console.log(AlphanumericMode('CHANDLERGENG', 1))
 console.log(NumericMode('01234567', 1))

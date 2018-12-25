@@ -1,27 +1,8 @@
-const MODE_Terminator = 0b0000; // 0
-const MODE_Numeric = 0b0001; //1 - 
-const MODE_Alphanumeric = 0b0010; //2 - 
-const MODE_Structured_Append = 0b0011; //3
-const MODE_8BIT = 0b0100; //4 - 
-const MODE_FNC1_1 = 0b0101; //5
-const MODE_ECI = 0b0111; //7
-const MODE_Kanji = 0b1000; //8 - 
-const MODE_FNC1_2 = 0b1001; //9
-const MODE_China = 0b1101; //13
+const Data = require('./data')
 
-const LEVEL_L = 0b01;
-const LEVEL_M = 0b00;
-const LEVEL_Q = 0b11;
-const LEVEL_H = 0b10;
+const MODE_NUMERIC = 0b0001; //1 - 
+const MODE_ALPHANUMERIC = 0b0010; //2 - 
 
-const MASK_0 = 0b000; // (i+j) % 2 = 0
-const MASK_1 = 0b001; // i % 2 = 0
-const MASK_2 = 0b010; // j % 3 = 0
-const MASK_3 = 0b011; // (i+j) % 3 = 0
-const MASK_4 = 0b100; // (i/2 + j/3) % 2 = 0
-const MASK_5 = 0b101; // ij % 2 + ij % 3 = 0
-const MASK_6 = 0b110; // (ij % 2 + ij % 3) % 2 = 0
-const MASK_7 = 0b111; // (ij % 3 + (i+j) % 2) % 2 = 0
 
 function versionBits(version, mode) {
   if (version >= 1 && version <= 9) {
@@ -57,21 +38,36 @@ function getStartCode(version, length, mode) {
   return `${modeCode}${charCode}`;
 }
 
-function getEndCode(code) {
-  code += '0000';
-  return fillZero(code, Math.ceil(code.length / 8.0) * 8, true);
+// 
+// 结束符和补齐符
+function getEndCode(bcode) {
+  bcode += '0000';
+  return fillZero(bcode, Math.ceil(bcode.length / 8.0) * 8, true);
+}
+// 
+// 补齐码（ Padding Bytes）
+function getPaddingCode(bcode, version) {
+  let requireLen = Data.CODEWORDS_COUNT[version],
+    len = bcode.length / 8;
+
+  for (let index = 0; index < requireLen - len; index++) {
+    if (index % 2 === 0) bcode += '11101100';
+    else if (index % 2 === 1) bcode += '00010001';
+  }
+
+  return bcode;
 }
 
 function NumericMode(str, version) {
   // 将每两个字符分为一组，然后转成上 45 进制，再转为 11bits 的二进制结果。对于落单的一个字符，则转为 6bits 的二进制结果
   let endchar = '',
     len = str.length,
-    startCode = getStartCode(version, len, MODE_Numeric);
+    startCode = getStartCode(version, len, MODE_NUMERIC);
   let arr = str.match(/\d{2,3}/g);
 
   let strcode = arr.reduce((ret, item) => {
     if (item.length === 3) {
-      return ret += fillZero(binaryString(item), versionBits(version, MODE_Numeric))
+      return ret += fillZero(binaryString(item), versionBits(version, MODE_NUMERIC))
     } else if (item.length === 2) {
       return ret += fillZero(binaryString(item), 8)
     } else if (item.length === 1) {
@@ -87,7 +83,7 @@ function AlphanumericMode(str, version) {
   // 将每两个字符分为一组，然后转成上 45 进制，再转为 11bits 的二进制结果。对于落单的一个字符，则转为 6bits 的二进制结果
   let endchar = '',
     len = str.length,
-    startCode = getStartCode(version, len, MODE_Alphanumeric);
+    startCode = getStartCode(version, len, MODE_ALPHANUMERIC);
 
   let arr = str.split('')
   if (len % 2 === 1) {

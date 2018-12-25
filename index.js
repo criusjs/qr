@@ -39,7 +39,7 @@ function getStartCode(version, length, mode) {
 }
 
 // 
-// 结束符和补齐符
+// 结束符 + 按8bits重排
 function getEndCode(bcode) {
   bcode += '0000';
   return fillZero(bcode, Math.ceil(bcode.length / 8.0) * 8, true);
@@ -49,7 +49,7 @@ function getEndCode(bcode) {
 function getPaddingCode(bcode, version) {
   let requireLen = Data.CODEWORDS_COUNT[version],
     len = bcode.length / 8;
-
+  console.log('==', requireLen, len)
   for (let index = 0; index < requireLen - len; index++) {
     if (index % 2 === 0) bcode += '11101100';
     else if (index % 2 === 1) bcode += '00010001';
@@ -108,9 +108,17 @@ function AlphanumericMode(str, version) {
   if (endchar.length === 1)
     strcode += fillZero(binaryString(charValue(endchar)), 6);
 
-  return getEndCode(strcode);
+  // return strcode;
+  let b8bits = getEndCode(strcode);
+  return getPaddingCode(b8bits, version);
 }
 
-console.log(AlphanumericMode('AE-86', 1))
-console.log(AlphanumericMode('HELLO WORLD', 1))
 console.log(NumericMode('01234567', 1))
+
+let content = AlphanumericMode('HELLO WORLD', 1);
+let r = content.match(/\d{8}/g);
+let ret = r.map(item => {
+  return parseInt(item, 2)
+})
+
+console.log(content, content.length, ret)

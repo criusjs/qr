@@ -238,6 +238,8 @@ function getBCHDigit(data) {
   return digit
 }
 
+// 校正图形（Alignment Patterns）：只有Version 2以上（包括Version2）的二维码需要这个东东?
+
 
 module.exports = {
   ALPHA_NUM_CHARS,
@@ -253,7 +255,6 @@ module.exports = {
   MASK_5,
   MASK_6,
   MASK_7,
-  MASK_FUNCTIONS,
   getMaskAt,
   EC_BLOCKS,
   EC_CODEWORDS,
